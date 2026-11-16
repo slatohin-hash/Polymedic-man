@@ -1,0 +1,17 @@
+{
+  "name": "Polymedic Man",
+  "short_name": "Polymedic Man",
+  "description": "Антон едет в Polymedica: прыгай через кочки и собирай логотипы.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0d3b73",
+  "theme_color": "#1f6fc5",
+  "lang": "ru",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
