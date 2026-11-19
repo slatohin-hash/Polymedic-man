@@ -247,7 +247,7 @@ function update(dt){
     }
   }
   if(!G.finished && (lv.len-G.dist)*PX_PER_M <= G.speed*G.speed/640) G.finished = true;
-  if(G.finished && G.speed<=0) levelComplete();
+  if(G.finished && G.speed<=0){ G.arrT=(G.arrT||0)+dt; if(G.arrT>1.4) levelComplete(); }
   if(G.shake>0) G.shake-=dt;
   runScore = Math.max(runScore, 0);
 }
@@ -395,10 +395,22 @@ function drawNear(lv){
     if(lv.night){ ctx.save(); ctx.shadowColor='#7fc4ff'; ctx.shadowBlur=24; }
     rr(x-10,GROUND-150,186,84,8); ctx.fillStyle='#fff'; ctx.fill(); ctx.strokeStyle='#1f6fc5'; ctx.lineWidth=4; ctx.stroke();
     if(lv.night) ctx.restore();
-    logo(x+38,GROUND-108,60);
-    ctx.fillStyle='#1f6fc5'; ctx.font='900 15px Rubik, sans-serif'; ctx.textAlign='left';
-    const lines = [['POLYMEDICA','уже близко!'],['ЗДОРОВЬЕ','рядом с вами'],['POLYMEDICA','ждёт Антона'],['ВПЕРЁД!','к здоровью']][((i%4)+4)%4];
-    ctx.fillText(lines[0],x+70,GROUND-112); ctx.font='700 11px Rubik, sans-serif'; ctx.fillStyle='#4a7fb6'; ctx.fillText(lines[1],x+72,GROUND-94);
+    const v=((i%3)+3)%3; ctx.textAlign='left';
+    if(v===0){
+      logo(x+26,GROUND-108,50);
+      ctx.fillStyle='#1a2f8a'; ctx.font='900 16px Rubik, sans-serif'; ctx.fillText('ПОЛИМЕДИКА',x+56,GROUND-122,114);
+      ctx.fillStyle='#1f6fc5'; ctx.font='800 14px Rubik, sans-serif'; ctx.fillText('+7 (3462) 77-44-08',x+56,GROUND-100,114);
+      ctx.fillStyle='#6a8bb0'; ctx.font='600 10px Rubik, sans-serif'; ctx.fillText('запись на приём',x+56,GROUND-82,114);
+    } else if(v===1){
+      logo(x+24,GROUND-108,46);
+      ctx.fillStyle='#1a2f8a'; ctx.font='800 14px Rubik, sans-serif'; ctx.fillText('УЗИ комплексы',x+52,GROUND-124,118);
+      ctx.fillStyle='#e53950'; ctx.font='900 36px Rubik, sans-serif'; ctx.fillText('−60%',x+52,GROUND-84,118);
+    } else {
+      logo(x+26,GROUND-108,50);
+      ctx.fillStyle='#6a8bb0'; ctx.font='600 10px Rubik, sans-serif'; ctx.fillText('медицинский центр',x+56,GROUND-126,114);
+      ctx.fillStyle='#1a2f8a'; ctx.font='900 16px Rubik, sans-serif'; ctx.fillText('ПОЛИМЕДИКА',x+56,GROUND-106,114);
+      ctx.fillStyle='#1f6fc5'; ctx.font='800 15px Rubik, sans-serif'; ctx.fillText('г. Сургут',x+56,GROUND-86,114);
+    }
   }
   if(lv.night){ // street lamps
     const off2=G.dist*PX_PER_M*0.9, s2=260, st2=Math.floor(off2/s2)-1;
@@ -471,21 +483,60 @@ function drawItem(it){
 }
 function heart(x,y){ ctx.fillStyle='#e53950'; ctx.beginPath(); ctx.moveTo(x,y+8); ctx.bezierCurveTo(x-14,y-2,x-8,y-12,x,y-5); ctx.bezierCurveTo(x+8,y-12,x+14,y-2,x,y+8); ctx.fill(); }
 function drawPolymedica(gx, lv){
-  if(gx > W+400 || gx < -400) return;
-  const x=gx, w=280, h=190;
-  ctx.fillStyle = lv.night ? '#c9d6ea' : '#e9f3fc'; ctx.fillRect(x,GROUND-h,w,h);
-  ctx.fillStyle='#1f6fc5'; ctx.fillRect(x-8,GROUND-h-12,w+16,16);
-  for(let r=0;r<3;r++) for(let c=0;c<5;c++){ ctx.fillStyle = lv.night ? '#ffe28a' : '#bcd8f2'; ctx.fillRect(x+18+c*52,GROUND-h+70+r*34,34,22); }
-  ctx.fillStyle='#9fd0ff'; ctx.fillRect(x+110,GROUND-62,60,62);
-  ctx.strokeStyle='#1f6fc5'; ctx.lineWidth=3; ctx.strokeRect(x+110,GROUND-62,60,62); ctx.beginPath(); ctx.moveTo(x+140,GROUND-62); ctx.lineTo(x+140,GROUND); ctx.stroke();
-  if(lv.night){ ctx.save(); ctx.shadowColor='#59b6ff'; ctx.shadowBlur=30; }
-  rr(x+20,GROUND-h-74,w-40,56,10); ctx.fillStyle='#fff'; ctx.fill(); ctx.strokeStyle='#1f6fc5'; ctx.lineWidth=4; ctx.stroke();
-  if(lv.night) ctx.restore();
-  logo(x+52,GROUND-h-46,50);
-  ctx.fillStyle='#1f6fc5'; ctx.font='900 26px Rubik, sans-serif'; ctx.textAlign='left'; ctx.fillText('POLYMEDICA',x+82,GROUND-h-36);
-  ctx.font='700 12px Rubik, sans-serif'; ctx.fillStyle='#4a7fb6'; ctx.fillText('филиал «'+lv.name+'»',x+84,GROUND-h-22);
-  logo(x-30,GROUND-130,44); logo(x+w+30,GROUND-130,44);
-  for(let i=0;i<8;i++){ ctx.fillStyle=i%2?'#fff':'#111'; ctx.fillRect(x+90,GROUND+i*10,10,10); ctx.fillStyle=i%2?'#111':'#fff'; ctx.fillRect(x+100,GROUND+i*10,10,10); }
+  if(gx > W+420 || gx < -420) return;
+  const x=gx, w=330, N=lv.night;
+  const BEIGE = N ? '#b9ad86' : '#e6d9a8', BLUE = N ? '#173d96' : '#2257c8', GLASS = N ? '#7f97c2' : '#c3d5ec', NAVY='#1a2f8a';
+  const winGlass = N ? '#ffe08a' : '#dfe9f4';
+  function siding(x1,y1,ww,hh,col,step){ ctx.fillStyle=col; ctx.fillRect(x1,y1,ww,hh); ctx.fillStyle='rgba(0,0,0,.07)'; for(let y=y1+step;y<y1+hh;y+=step) ctx.fillRect(x1,y,ww,1.2); }
+  function grid(x1,y1,ww,hh,sx,sy){ ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=1.4; ctx.beginPath();
+    for(let gx2=x1;gx2<=x1+ww+.1;gx2+=sx){ ctx.moveTo(gx2,y1); ctx.lineTo(gx2,y1+hh); }
+    for(let gy=y1;gy<=y1+hh+.1;gy+=sy){ ctx.moveTo(x1,gy); ctx.lineTo(x1+ww,gy); } ctx.stroke(); }
+  function win(wx,wy,ww,hh){ ctx.fillStyle='#fff'; ctx.fillRect(wx-2,wy-2,ww+4,hh+4); ctx.fillStyle=winGlass; ctx.fillRect(wx,wy,ww,hh);
+    ctx.fillStyle='#fff'; ctx.fillRect(wx+ww/2-1,wy,2,hh); ctx.fillRect(wx,wy+hh*.35,ww,1.5); }
+  // tower + top beige floor
+  siding(x+4,GROUND-250,96,60,BEIGE,6);
+  siding(x+4,GROUND-216,w-4,58,BEIGE,6);
+  ctx.fillStyle='#8a8f99'; for(let k=0;k<6;k++) ctx.fillRect(x+110+k*36,GROUND-221,3,6);
+  win(x+150,GROUND-200,28,13); win(x+250,GROUND-190,22,12);
+  // blue body with siding
+  siding(x,GROUND-158,w,158,BLUE,6);
+  // beige stripes between windows
+  ctx.fillStyle=BEIGE; for(const ry of [GROUND-104,GROUND-62]) ctx.fillRect(x+104,ry,w-118,16);
+  // glass sign band
+  ctx.fillStyle=GLASS; ctx.fillRect(x+96,GROUND-160,w-110,42); grid(x+96,GROUND-160,w-110,42,15,21);
+  ctx.fillStyle=NAVY; ctx.textAlign='center';
+  ctx.font='800 10px Rubik, sans-serif'; ctx.fillText('МЕДИЦИНСКИЙ  ЦЕНТР',x+96+(w-110)/2,GROUND-146);
+  ctx.font='900 25px Rubik, sans-serif'; ctx.fillText('ПОЛИМЕДИКА',x+96+(w-110)/2,GROUND-122,w-124);
+  // tall glass column with logo, caduceus, heart
+  ctx.fillStyle=GLASS; ctx.fillRect(x+8,GROUND-212,88,212); grid(x+8,GROUND-212,88,212,22,22);
+  if(N){ ctx.save(); ctx.shadowColor='#7fc4ff'; ctx.shadowBlur=26; }
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x+52,GROUND-172,30,0,7); ctx.fill();
+  if(N) ctx.restore();
+  logo(x+52,GROUND-172,62);
+  ctx.strokeStyle= N ? '#5571a8' : '#8ea8cf'; ctx.lineWidth=3; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x+52,GROUND-136); ctx.lineTo(x+52,GROUND-62); ctx.stroke();
+  ctx.lineWidth=2.2; ctx.beginPath();
+  for(let t=0;t<=1.0001;t+=.05){ const yy=GROUND-130+t*60, xx=x+52+Math.sin(t*Math.PI*3)*9; t===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy); } ctx.stroke();
+  ctx.beginPath(); for(let t=0;t<=1.0001;t+=.05){ const yy=GROUND-130+t*60, xx=x+52-Math.sin(t*Math.PI*3)*9; t===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy); } ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x+52,GROUND-132); ctx.quadraticCurveTo(x+34,GROUND-146,x+26,GROUND-128); ctx.moveTo(x+52,GROUND-132); ctx.quadraticCurveTo(x+70,GROUND-146,x+78,GROUND-128); ctx.stroke();
+  ctx.lineWidth=2.5; ctx.beginPath(); const hx0=x+46, hy0=GROUND-38;
+  ctx.moveTo(hx0,hy0+20); ctx.bezierCurveTo(hx0-30,hy0,hx0-18,hy0-22,hx0,hy0-10); ctx.bezierCurveTo(hx0+18,hy0-22,hx0+30,hy0,hx0,hy0+20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(hx0-18,hy0); ctx.lineTo(hx0-6,hy0); ctx.lineTo(hx0-2,hy0-7); ctx.lineTo(hx0+3,hy0+6); ctx.lineTo(hx0+7,hy0); ctx.lineTo(hx0+18,hy0); ctx.stroke();
+  // windows: 2 upper rows + ground row
+  for(const ry of [GROUND-108,GROUND-66]) for(let wx=x+112; wx<x+w-34; wx+=42) win(wx,ry,28,22);
+  for(let wx=x+168; wx<x+w-34; wx+=42) win(wx,GROUND-30,28,22);
+  // entrance: double door with yellow frame
+  ctx.fillStyle='#e8c84a'; ctx.fillRect(x+98,GROUND-50,48,50);
+  ctx.fillStyle='#f4f6f8'; ctx.fillRect(x+102,GROUND-46,40,46);
+  ctx.fillStyle= N ? '#ffe9a8' : '#cfdbe8'; ctx.fillRect(x+105,GROUND-42,16,40); ctx.fillRect(x+123,GROUND-42,16,40);
+  logo(x+113,GROUND-26,12); logo(x+131,GROUND-26,12);
+  // hours plate + black pharmacy cross
+  ctx.fillStyle='#1f3f9a'; ctx.fillRect(x+150,GROUND-46,12,22); ctx.fillStyle='#fff'; ctx.fillRect(x+152,GROUND-42,8,1.5); ctx.fillRect(x+152,GROUND-38,8,1.5); ctx.fillRect(x+152,GROUND-34,8,1.5);
+  ctx.fillStyle='#16181c'; ctx.fillRect(x+106,GROUND-74,8,22); ctx.fillRect(x+99,GROUND-67,22,8);
+  // roof lights
+  ctx.fillStyle='#666'; ctx.fillRect(x+30,GROUND-256,3,6); ctx.fillRect(x+70,GROUND-256,3,6);
+  // finish line in front of the door
+  for(let i=0;i<8;i++){ ctx.fillStyle=i%2?'#fff':'#111'; ctx.fillRect(x+100,GROUND+i*10,10,10); ctx.fillStyle=i%2?'#111':'#fff'; ctx.fillRect(x+110,GROUND+i*10,10,10); }
 }
 
 // ---------------- rider ----------------
