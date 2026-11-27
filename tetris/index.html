@@ -247,7 +247,7 @@ function pause(){if(state!=='play')return;state='pause';$('pause').textContent='
   card(`<img src="${LOGO}" alt=""><h2>Перерыв</h2><p>Доктор скоро вернётся</p><button class="btn" id="go">Продолжить</button><button class="btn alt" id="snd">${sndLabel()}</button>`)}
 function resume(){state='play';$('ov').hidden=true;$('pause').textContent='II';last=performance.now()}
 function menu(){
-  card(`<img src="${LOGO}" alt=""><h2>Polymedica</h2><p>Соберите линию — пациент здоров!</p>
+  card(`<img src="${LOGO}" alt=""><h2>Polymedica</h2><p>Соберите линию — пациент здоров!<br><small>версия 2 · бонусы и карман</small></p>
   <ul><li><i>↔</i>Свайп влево / вправо — сдвиг</li><li><i>↓</i>Резкий свайп вниз — сброс</li><li><i>↑</i>Свайп вверх — в карман</li><li><i>⟳</i>Тап — поворот</li>
   <li><i class="b">✚</i>Бонусы: скорая, скальпель, витамин</li></ul>
   <button class="btn" id="go">Начать приём</button><button class="btn alt" id="snd">${sndLabel()}</button>`);
